@@ -18,30 +18,27 @@ function callVarnish(url) {
 function updateStat() {
     // Get varnishd pid
     // ps aux | grep varnishd | grep -v grep | awk '{print $2}'
-    $.get('/cgi-bin/getvrnpid.txt', function(pid) {
-        // In case Varnishd is not running:
+    $.get('/cgi-bin/getvrnpid.txt').done(function(pid){
         if (pid.trim() == '') {
-            $('#pid').text('Stopped');
-            $('#pid').removeClass('badge-success');
-            // Varnishd is running:
+            $('#pid').text('Stopped').attr('class', 'btn btn-danger');
+        
+        // Varnishd is running:
         } else {
-            $('#pid').text('Varnish Running (' + pid.trim() + ')');
-            $('#pid').addClass('badge-success');
-
+            $('#pid').text('Varnish Running (' + pid.trim() + ')').attr('class', 'btn btn-success');
+            
             // Get varnish status
             // varnishadm -S /etc/varnish/secret.www-data -T 127.0.0.1:6082 status
-            $.get('/cgi-bin/status.txt', function(status) {
-                // varnish is stopped:
+            $.get('/cgi-bin/status.txt').done(function(status){
                 if (status.indexOf('running') == -1) {
-                    $('#status').text('Stopped');
-                    $('#status').removeClass('badge-success');
-                    // varnish has started:
+                    $('#status').text('Stopped').attr('class', 'btn btn-danger');
+                
+                // varnish has started:
                 } else {
-                    $('#status').text(status.trim());
-                    $('#status').addClass('badge-success');
+                    $('#status').text(status.trim()).attr('class', 'btn btn-success');
+                    
                     // get varnishstat
                     //	varnishstat -j -1
-                    $.getJSON('/cgi-bin/varnishstat.json', function(data) {
+                    $.getJSON('/cgi-bin/varnishstat.json').done(function(data){
                         // for each value:
                         $.each(data, function(key, val) {
                             // we remove any character that cold cause trouble:
@@ -60,28 +57,36 @@ function updateStat() {
                                 $('#stat').append('<tr id="s_' + ekey + '" class="secondary"><td><a href="#" class="key" rel="tooltip" title="' + val['description'] + '">' + key + '</a></td><td>' + val['value'] + '</td></tr>');
                             }
                         });
+                        
                         // we calculate the ratio HIT/(HIT+MISS)
-                        ratio = Math.floor(data['MAIN.cache_hit']['value'] / (data['MAIN.cache_miss']['value'] + data['MAIN.cache_hit']['value']) * 100);
+                        var ratio = Math.floor(data['MAIN.cache_hit']['value'] / (data['MAIN.cache_miss']['value'] + data['MAIN.cache_hit']['value']) * 100);
                         // Depending on the ratio we change the badge color:
                         if (isNaN(ratio)) {
-                            $('#ratio').removeClass('badge-inverse badge-important badge-warning badge-success');
+                            $('#ratio').attr('class', 'btn btn-default').hide();
                         } else if (ratio < 15) {
-                            $('#ratio').removeClass('badge-inverse badge-important badge-warning badge-success').addClass('badge-inverse');
+                            $('#ratio').attr('class', 'btn btn-danger');
                         } else if (ratio < 50) {
-                            $('#ratio').removeClass('badge-inverse badge-important badge-warning badge-success').addClass('badge-important');
+                            $('#ratio').attr('class', 'btn btn-warning');
                         } else if (ratio < 90) {
-                            $('#ratio').removeClass('badge-inverse badge-important badge-warning badge-success').addClass('badge-warning');
+                            $('#ratio').attr('class', 'btn btn-info');
                         } else {
-                            $('#ratio').removeClass('badge-inverse badge-important badge-warning badge-success').addClass('badge-success');
+                            $('#ratio').attr('class', 'btn btn-success');
                         }
                         $('#ratio').text(ratio + "%");
                         $('.key').tooltip();
+                        
+                        // come back in 2 second:
+                        setTimeout(updateStat, 2000);
+                    }).error(function(){
+                        $('#ratio').attr('class', 'btn btn-danger').text('Error');
                     });
                 }
-                // come back in 1 second:
-                setTimeout(updateStat, 1000);
+            }).error(function(){
+                $('#status').attr('class', 'btn btn-danger').text('Error');
             });
         }
+    }).error(function(){
+        $('#pid').text('Error').attr('class', 'btn btn-danger');
     });
 }
 
