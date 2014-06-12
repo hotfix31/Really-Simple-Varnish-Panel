@@ -90,7 +90,7 @@ function updateStat() {
 }
 
 
-$('.key').tooltip({
+$('tr[rel="tooltip"]').tooltip({
     container: 'body',
     placement:'left'
 });
