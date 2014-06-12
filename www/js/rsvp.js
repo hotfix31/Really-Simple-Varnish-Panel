@@ -50,7 +50,7 @@ function updateStat() {
                                 $('#s_' + ekey + ' > td:last').text(val);
                                 // if this value is already in the html table, we just update its value:
                             } else if ($('#s_' + ekey).length > 0) {
-                                $('#s_' + ekey + ' > td:first').attr('title',val['description']).text(key);
+                                $('#s_' + ekey).attr('title',val['description']).find('> td:first').text(key);
                                 $('#s_' + ekey + ' > td:last').text(val['value']);
                                 // else we add a new row to the html table:
                             } else {
