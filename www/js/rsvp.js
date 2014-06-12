@@ -50,11 +50,11 @@ function updateStat() {
                                 $('#s_' + ekey + ' > td:last').text(val);
                                 // if this value is already in the html table, we just update its value:
                             } else if ($('#s_' + ekey).length > 0) {
-                                $('#s_' + ekey + ' > td:first').html('<a href="#" class="key" rel="tooltip" title="' + val['description'] + '">' + key + '</a>');
-                                $('#s_' + ekey + ' > td:last').html('<label>' + val['value'] + '</label>');
+                                $('#s_' + ekey + ' > td:first').attr('title',val['description']).text(key);
+                                $('#s_' + ekey + ' > td:last').text(val['value']);
                                 // else we add a new row to the html table:
                             } else {
-                                $('#stat').append('<tr id="s_' + ekey + '" class="secondary"><td><a href="#" class="key" rel="tooltip" title="' + val['description'] + '">' + key + '</a></td><td>' + val['value'] + '</td></tr>');
+                                $('#stat').append('<tr id="s_' + ekey + '" class="secondary" rel="tooltip" title="' + val['description'] + '"><td>' + key + '</td><td>' + val['value'] + '</td></tr>');
                             }
                         });
                         
@@ -73,7 +73,6 @@ function updateStat() {
                             $('#ratio').attr('class', 'btn btn-success');
                         }
                         $('#ratio').text(ratio + "%");
-                        $('.key').tooltip();
                         
                         // come back in 2 second:
                         setTimeout(updateStat, 2000);
@@ -89,6 +88,12 @@ function updateStat() {
         $('#pid').text('Error').attr('class', 'btn btn-danger');
     });
 }
+
+
+$('.key').tooltip({
+    container: 'body',
+    placement:'left'
+});
 
 /* Ban everything */
 function banCache() {
